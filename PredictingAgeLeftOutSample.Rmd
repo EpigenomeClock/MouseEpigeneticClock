@@ -1,0 +1,113 @@
+---
+title: "Predicting Methylation Age In Mouse"
+output: html_document
+# params:
+#    covFolder: NULL
+#    RdataFile: NULL
+
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Sequencing Data
+
+The first step to get to the methylation age prediction of the ages in mouse is the mapping of the sequencing data to mouse genome.
+For this trim galore (for QC) Bismark (for the actual mapping is used mapping the data to the latest mouse genome build (GRCm38).
+The genome reference is available:
+ftp://ftp.ensembl.org/pub/release-87/fasta/mus_musculus/dna/
+Software is available:
+https://github.com/FelixKrueger/Bismark
+https://github.com/FelixKrueger/TrimGalore
+
+
+The used settings are shown below:
+
+`trim_galore --rrbs *fastq.gz
+ 
+bismark --genome GRCm38 -1 R1_trimmed.fq.gz -2 R2_trimmed.fq.gz
+ 
+bismark_methylation_extractor --gzip --bedGraph *bam`
+
+From the Bismark mapping we take the ".cov"" / ".cov.gz"" files which can be used in the code below to calculate the methylation age.
+Please be aware that the read data has to be merged before attempting the age prediction.
+
+## Predicting methylation age in mouse
+After alignment we take the ".cov" file from the mapping. Please make a folder containing only the methylation files you want to use during the prediction.
+Files found in the folder:
+
+
+```{r readData, echo=F}
+load(params$RdataFile)
+source(params$sourceFunctions)
+require(preprocessCore)
+
+toProcess <- list.files(params$covFolder,pattern = ".cov")
+print(toProcess)
+
+filesToProcess <- list()
+for(file in toProcess){
+  tmp <- read.delim(paste(params$covFolder,file,sep=""),as.is = T, header = F)
+  rownames(tmp)<- paste(tmp[,1], tmp[,2],sep=":")
+  tmp <- tmp[,4:ncol(tmp)]
+  tmp[,2] <- tmp[,2]+tmp[,3]
+  tmp[,1] <- tmp[,1]/100
+  tmp <- tmp[which(tmp[,2]>=params$ReadDepth),c(1:2)]
+  tmp <- tmp[which(rownames(tmp) %in% sitesForPrediction),]
+  filesToProcess[[file]] <- tmp
+}
+
+```
+
+As a first step we are going to identify the 13 thousand sites which were present in the original samples. If all are found, we can use the original quantile normalization to normalize the samples. If these sites are not present in a sample this sample is taken along for direct prediction without quantile normalization. The next step is to identify the samples which have all clock sites. The clock sites are selected and standardized using the original site mean and site standard deviation. As a last step we take the methylation values and perform the prediction and plot and write the methylation age predictions
+
+```{r processData, echo=F}
+  predictedAges <- list()
+  qnPerformed <- NULL
+  for(i in 1:length(filesToProcess)){
+    
+    if(dim(filesToProcess[[i]])[1]==length(sitesForPrediction)){
+      filesToProcess[[i]][,1] <- normalize.quantiles.use.target(matrix(filesToProcess[[i]][,1],ncol=1), target = qnTarget)
+      print(paste("QN was performed for sample: ",names(filesToProcess)[i]))
+      qnPerformed <- c(qnPerformed,T)
+    } else {
+      print(paste("QN was not possible for sample: ",names(filesToProcess)[i]))
+      qnPerformed <- c(qnPerformed,F)
+    }
+    
+    filesToProcess[[i]] <- filesToProcess[[i]][which(rownames(filesToProcess[[i]]) %in% rownames(betas)),]
+  
+    if(dim(filesToProcess[[i]])[1]==length(rownames(betas))){
+      
+      filesToProcess[[i]] <- filesToProcess[[i]][order(rownames(filesToProcess[[i]])),]
+      filesToProcess[[i]]<- sweep(x =filesToProcess[[i]], 1, rowMean, "-" )
+      filesToProcess[[i]] <- sweep(x =filesToProcess[[i]], 1, rowStDev, "/" )
+      
+      sitesTrainingData <- as.data.frame(filesToProcess[[i]][,1])
+      betaScoreSample <- sitesTrainingData*betas
+      betaScoreSample <- apply(betaScoreSample,2, sum)
+       
+      predictedAges[names(filesToProcess)[i]] <- revertAge(betaScoreSample)
+      print(paste("Age was predicted for sample: ",names(filesToProcess)[i]))
+    } else {
+      print(paste("Unable to predict age for sample: ",names(filesToProcess)[i]))
+      predictedAges[names(filesToProcess)[i]] <- NA
+    }
+  }
+```
+
+The final predicted ages are:
+
+```{r finalStage, echo=F}
+  for(i in 1:length(predictedAges)){
+    if(qnPerformed[i]){
+      print(paste("Predicted age for sample ",names(filesToProcess)[i],": ",round(predictedAges[[i]],digits = 1), sep=""))
+    } else {
+      print(paste("Predicted age for sample ",names(filesToProcess)[i],": ",round(predictedAges[[i]],digits = 1), " *", sep=""))
+    }
+    
+  }
+```
+
+Age predictions which are marked with a star, are not quantile normalized before running the age prediction, prediction might be off.
