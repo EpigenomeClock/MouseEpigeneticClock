@@ -8,13 +8,14 @@
 # install.pandoc()
 
 #Put here the location of the package
-setwd("C:/OnlineFolders/Dropbox/EBI/EpigeneticClock_Mouse/Rough_figures/Prediction_package_20170120/")
-setwd("E:/OnlineFolders/Dropbox/EBI/EpigeneticClock_Mouse/Rough_figures/Prediction_package_20170120/")
+setwd("./PredictionPackage_20170215/")
 
-covFol = "./bismarkFiles/"
-RdataF = "./PredictionPackage_20170120_v2.Rdata"
+RdataF = "./PredictionPackage_20170215.Rdata"
 functionFile = "./PredictorFunctions.R"
-params = list(covFolder = covFol, RdataFile =RdataF, sourceFunctions=functionFile)
+covFol = "./bismarkFiles/"
+readDepth = 5
+
+params = list(covFolder = covFol, RdataFile =RdataF, sourceFunctions=functionFile, ReadDepth = readDepth)
 
 #Render mark down
-rmarkdown::render('./PredictingAgeLeftOutSample.Rmd', params = params)
+rmarkdown::render('./PredictingAgeLeftOutSample.Rmd', params = params,output_file = paste('./PredictingAgeLeftOutSample.html',sep=""))
