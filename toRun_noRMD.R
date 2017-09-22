@@ -21,12 +21,12 @@ print(toProcess)
 
 filesToProcess <- list()
 for(file in toProcess){
-  tmp <- read.delim(paste(params$covFolder,file,sep=""),as.is = T, header = F)
+  tmp <- read.delim(paste(covFolder,file,sep=""),as.is = T, header = F)
   rownames(tmp)<- paste(tmp[,1], tmp[,2],sep=":")
   tmp <- tmp[,4:ncol(tmp)]
   tmp[,2] <- tmp[,2]+tmp[,3]
   tmp[,1] <- tmp[,1]/100
-  tmp <- tmp[which(tmp[,2]>=params$ReadDepth),c(1:2)]
+  tmp <- tmp[which(tmp[,2]>=ReadDepth),c(1:2)]
   tmp <- tmp[which(rownames(tmp) %in% sitesForPrediction),]
   filesToProcess[[file]] <- tmp
 }
