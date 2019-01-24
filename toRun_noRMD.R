@@ -46,6 +46,7 @@ for(i in 1:length(filesToProcess)){
   }
   
   filesToProcess[[i]] <- filesToProcess[[i]][which(rownames(filesToProcess[[i]]) %in% rownames(betas)),]
+  filesToProcess[[i]] <- filesToProcess[[i]][rownames(betas),]
   
   if(dim(filesToProcess[[i]])[1]==length(rownames(betas))){
     
