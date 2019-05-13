@@ -3,9 +3,11 @@
 # install.packages("knitr", repos='http://cran.us.r-project.org')
 # install.packages("rmarkdown", repos='http://cran.us.r-project.org')
 # biocLite("preprocessCore")
+# install.packages("readr")
+# install.packages("DMwR2")
 # install.packages("installr")
-# require(installr)
 # install.pandoc()
+
 
 #Put here the location of the package
 setwd("./PredictionPackage_20170215/")
