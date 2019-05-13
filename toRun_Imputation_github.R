@@ -19,9 +19,6 @@ readDepth = 5
 params = list(covFolder = covFol, RdataFile =RdataF, sourceFunctions=functionFile, ReadDepth = readDepth, ImputationTrainingMatrix = ImputationTrainingMatrix)
 
 #Render mark down
-rmarkdown::render('./PredictingAgeLeftOutSample.Rmd', 
-                  params = params,
-                  output_file = paste('./PredictingAgeLeftOutSample.html',sep=""))
 rmarkdown::render('./ImputationAndPrediction_github.Rmd',
                   params = params,
                   output_file = paste('./ImputationAndPrediction.html',sep=""))
