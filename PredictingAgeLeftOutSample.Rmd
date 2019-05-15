@@ -60,7 +60,7 @@ for(file in toProcess){
 
 ```
 
-As a first step we are going to identify the 13 thousand sites which were present in the original samples. If all are found, we can use the original quantile normalization to normalize the samples. If these sites are not present in a sample this sample is taken along for direct prediction without quantile normalization. The next step is to identify the samples which have all clock sites. The clock sites are selected and standardized using the original site mean and site standard deviation. As a last step we take the methylation values and perform the prediction and plot and write the methylation age predictions
+As a first step we are going to identify the 18 thousand sites which were present in the original samples. If all are found, we can use the original quantile normalization to normalize the samples. If these sites are not present in a sample this sample is taken along for direct prediction without quantile normalization. The next step is to identify the samples which have all clock sites. The clock sites are selected and standardized using the original site mean and site standard deviation. As a last step we take the methylation values and perform the prediction and plot and write the methylation age predictions
 
 ```{r processData, echo=F}
   predictedAges <- list()
