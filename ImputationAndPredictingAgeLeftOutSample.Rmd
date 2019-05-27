@@ -43,7 +43,6 @@ load(params$RdataFile)
 source(params$sourceFunctions)
 require(preprocessCore)
 
-
 toProcess <- list.files(params$covFolder,pattern = ".cov") #list of bismarked files
 print(toProcess)
 
@@ -65,8 +64,6 @@ rm(tmp, covFol, functionFile, ImputationTrainingMatrix, RdataF)
 
 
 ```{r impute, echo=F, warning=F}
-library(readr)
-library(DMwR2)
 
 # import data which is used for imputation
 TrainingMatrix <- read.delim(params$ImputationTrainingMatrix, row.names=1, sep="\t",as.is=T)
