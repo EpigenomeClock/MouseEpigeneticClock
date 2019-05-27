@@ -42,10 +42,9 @@ Files found in the folder:
 load(params$RdataFile)
 source(params$sourceFunctions)
 require(preprocessCore)
-library(readr)
-library(DMwR2)
 
-toProcess <- list.files(params$covFolder,pattern = ".cov")  #list of bismarked files
+
+toProcess <- list.files(params$covFolder,pattern = ".cov") #list of bismarked files
 print(toProcess)
 
 filesToProcess <- list()
