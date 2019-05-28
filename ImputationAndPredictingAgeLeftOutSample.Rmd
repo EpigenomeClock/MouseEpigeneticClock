@@ -66,6 +66,7 @@ rm(tmp, covFol, functionFile, ImputationTrainingMatrix, RdataF)
 
 
 ```{r impute, echo=F, warning=F}
+
 # import data which is used for imputation
 TrainingMatrix <- read.delim(params$ImputationTrainingMatrix, row.names=1, sep="\t",as.is=T)
 
@@ -98,7 +99,12 @@ if (length(filesToProcess) == 1) {
 }
 
 # kNN imputation (k=5)
-MergeImp  <- knnImputation(MergeAll, k = 5, scale = TRUE, meth = "weighAvg", distData = MergeAll)
+MergeImp <- knnImputation(t(MergeAll),
+                          k = 5, 
+                          scale = F, 
+                          meth = "weighAvg", 
+                          distData = t(TrainingMatrix)) 
+MergeImp <- t(MergeImp)
 
 
 rm(filesToProcess)
@@ -135,7 +141,10 @@ If all methylation values could be imputed, we can use the original quantile nor
   qnPerformed <- NULL
   for(i in 1:length(filesToProcess)){
     
-    if(dim(filesToProcess[[i]])[1]==length(sitesForPrediction)){
+    if ( sum(is.na(MergeAll[,i]))/length(sitesForPrediction) == 1) { 
+      print(paste("QN was not possible (as not a single CpG site was covered) by sample: ",names(filesToProcess)[i]))
+      qnPerformed <- c(qnPerformed,F)
+    } else if(dim(filesToProcess[[i]])[1]==length(sitesForPrediction)){
       filesToProcess[[i]][,1] <- normalize.quantiles.use.target(matrix(filesToProcess[[i]][,1],ncol=1), target = qnTarget)
       print(paste("QN was performed for sample: ",names(filesToProcess)[i]))
       qnPerformed <- c(qnPerformed,T)
@@ -147,7 +156,10 @@ If all methylation values could be imputed, we can use the original quantile nor
     filesToProcess[[i]] <- filesToProcess[[i]][which(rownames(filesToProcess[[i]]) %in% rownames(betas)),]
     filesToProcess[[i]] <- filesToProcess[[i]][rownames(betas),]
   
-    if(dim(filesToProcess[[i]])[1]==length(rownames(betas))){
+    if ( sum(is.na(MergeAll[,i]))/length(sitesForPrediction) == 1 ) { ### # NA if no CpG site covered
+      print(paste("Unable to predict age for sample: ",names(filesToProcess)[i]))
+      predictedAges[names(filesToProcess)[i]] <- NA
+    } else if (dim(filesToProcess[[i]])[1]==length(rownames(betas))){
       
       filesToProcess[[i]] <- filesToProcess[[i]][order(rownames(filesToProcess[[i]])),]
       filesToProcess[[i]]<- sweep(x =filesToProcess[[i]], 1, rowMean, "-" )
