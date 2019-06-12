@@ -99,12 +99,17 @@ if (length(filesToProcess) == 1) {
 }
 
 # kNN imputation (k=5)
-MergeImp <- knnImputation(t(MergeAll),
-                          k = 5, 
-                          scale = F, 
-                          meth = "weighAvg", 
-                          distData = t(TrainingMatrix)) 
-MergeImp <- t(MergeImp)
+MergeImp <- MergeAll
+
+for (i in seq_len(ncol(Merge))) { # overwrites MergeAll results with imputed values (in case Imputation is possible)
+  try(expr = {
+    MergeImp[,i] <- knnImputation(t(MergeAll[,i]),
+                                            k = 5,
+                                            scale = F,
+                                            meth = "weighAvg",
+                                            distData = t(TrainingMatrix)) },
+    silent = T)
+}
 
 
 rm(filesToProcess)
