@@ -129,8 +129,11 @@ As a first step, we are going to impute the methylation levels for all the 18 th
 
 The following number of CpG sites was imputated to obtain a methylation level:
 ```{r print_NA_number, echo=F}
-
-print(colSums(is.na(MergeAll[,1:length(toProcess)])))
+if (length(filesToProcess) == 1) {
+  print(sum(is.na(MergeAll[,1])))
+} else {
+  print(colSums(is.na(MergeAll[,1:length(toProcess)])))
+}
 ```
 This corresponds to the following percentage of imputed methylation levels out of all 18 thousand methylation levels:
 ```{r print_NA_percent, echo=F}
