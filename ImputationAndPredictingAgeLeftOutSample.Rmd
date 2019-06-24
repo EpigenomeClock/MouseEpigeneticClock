@@ -73,13 +73,15 @@ TrainingMatrix <- read.delim(params$ImputationTrainingMatrix, row.names=1, sep="
 
 # merge new samples
 Merge <- filesToProcess[[1]]
+colnames(Merge) <- c( 'meth1', 'reads1')
 
 if (length(filesToProcess) == 1) { 
-  colnames(Merge) <- names(filesToProcess)[1]
+  colnames(Merge) <- c(names(filesToProcess)[1], 'reads') 
 }
 
 if (length(filesToProcess) > 1) {
   for (i in 2:length(filesToProcess)) {
+    colnames(filesToProcess[[i]]) <- c(paste0('meth', i), paste0('reads', i))
     Merge <- merge(Merge, filesToProcess[[i]], by="row.names", all = T, nomatch = NA) 
     rownames(Merge) <- Merge[,1] 
     Merge <- Merge[,2:ncol(Merge)]
@@ -127,8 +129,11 @@ As a first step, we are going to impute the methylation levels for all the 18 th
 
 The following number of CpG sites was imputated to obtain a methylation level:
 ```{r print_NA_number, echo=F}
-
-print(colSums(is.na(MergeAll[,1:length(toProcess)])))
+if (length(filesToProcess) == 1) {
+  print(sum(is.na(MergeAll[,1])))
+} else {
+  print(colSums(is.na(MergeAll[,1:length(toProcess)])))
+}
 ```
 This corresponds to the following percentage of imputed methylation levels out of all 18 thousand methylation levels:
 ```{r print_NA_percent, echo=F}
