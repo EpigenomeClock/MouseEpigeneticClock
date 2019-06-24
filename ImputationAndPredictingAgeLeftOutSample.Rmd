@@ -76,7 +76,7 @@ Merge <- filesToProcess[[1]]
 colnames(Merge) <- c( 'meth1', 'reads1')
 
 if (length(filesToProcess) == 1) { 
-  colnames(Merge) <- c(names(filesToProcess)[1], 'reads')
+  colnames(Merge) <- c(names(filesToProcess)[1], 'reads') 
 }
 
 if (length(filesToProcess) > 1) {
