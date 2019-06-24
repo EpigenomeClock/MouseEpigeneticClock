@@ -73,13 +73,15 @@ TrainingMatrix <- read.delim(params$ImputationTrainingMatrix, row.names=1, sep="
 
 # merge new samples
 Merge <- filesToProcess[[1]]
+colnames(Merge) <- c( 'meth1', 'reads1')
 
 if (length(filesToProcess) == 1) { 
-  colnames(Merge) <- names(filesToProcess)[1]
+  colnames(Merge) <- c(names(filesToProcess)[1], 'reads')
 }
 
 if (length(filesToProcess) > 1) {
   for (i in 2:length(filesToProcess)) {
+    colnames(filesToProcess[[i]]) <- c(paste0('meth', i), paste0('reads', i))
     Merge <- merge(Merge, filesToProcess[[i]], by="row.names", all = T, nomatch = NA) 
     rownames(Merge) <- Merge[,1] 
     Merge <- Merge[,2:ncol(Merge)]
